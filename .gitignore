@@ -1,0 +1,17 @@
+# Build
+target/
+frontend/node_modules/
+frontend/dist/
+
+# Segredos locais (use .env.example como modelo)
+.env
+
+# IDE / SO
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

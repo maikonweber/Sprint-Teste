@@ -1,0 +1,56 @@
+# Ambiente completo de desenvolvimento: PostgreSQL + backend + frontend.
+#   cp .env.example .env
+#   docker compose up --build            # tudo
+#   docker compose up -d postgres        # apenas o banco (backend/frontend rodando localmente)
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME:-people}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-people}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env (cp .env.example .env)}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-PT1H}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Defina ADMIN_PASSWORD no .env (cp .env.example .env)}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      NATIONALIZE_BASE_URL: ${NATIONALIZE_BASE_URL:-https://api.nationalize.io}
+      NATIONALIZE_TIMEOUT: ${NATIONALIZE_TIMEOUT:-PT5S}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # URL usada pelo navegador do usuário, por isso aponta para a porta publicada no host.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres-data:

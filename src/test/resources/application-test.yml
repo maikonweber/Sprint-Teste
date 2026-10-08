@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    # H2 em modo de compatibilidade PostgreSQL: as mesmas migrations Flyway rodam sem Docker/internet.
+    url: jdbc:h2:mem:people-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+
+app:
+  security:
+    jwt:
+      secret: test-only-secret-key-with-more-than-32-chars
+      expiration: PT15M
+      issuer: people-api
+  admin:
+    username: admin
+    password: admin123
+  cors:
+    allowed-origins: http://localhost:5173
+  nationalize:
+    base-url: http://localhost:65535
+    timeout: PT2S
+
+logging:
+  level:
+    com.example.people: WARN

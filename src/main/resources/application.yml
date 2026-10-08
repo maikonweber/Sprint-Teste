@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: people-api
+  config:
+    # Permite rodar localmente com `./mvnw spring-boot:run` lendo as variáveis do arquivo .env.
+    # Variáveis de ambiente reais sempre têm precedência.
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:people}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:}
+      expiration: ${JWT_EXPIRATION:PT1H}
+      issuer: ${JWT_ISSUER:people-api}
+  admin:
+    username: ${ADMIN_USERNAME:}
+    password: ${ADMIN_PASSWORD:}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  nationalize:
+    base-url: ${NATIONALIZE_BASE_URL:https://api.nationalize.io}
+    timeout: ${NATIONALIZE_TIMEOUT:PT5S}
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /swagger-ui.html
+    operations-sorter: method
+
+logging:
+  level:
+    com.example.people: INFO
